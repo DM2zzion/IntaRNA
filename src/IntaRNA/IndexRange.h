@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 
+#include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
 namespace IntaRNA {
@@ -174,7 +175,82 @@ public:
 		from = boost::lexical_cast<size_t>(stringEncoding.substr(0,splitPos));
 		to = boost::lexical_cast<size_t>(stringEncoding.substr(splitPos+1));
 	}
+	
+	/**
+	 * Cuts an IndexRange into overlapping windows
+	 * @param windowWidth the width of a window
+	 * @param windowsOverlap the amount of overlap between two windows
+	 * @return a vector of IndexRanges which represent windows
+	 */
+	std::vector<IndexRange> overlappingWindows(const size_t& windowWidth, const size_t& windowsOverlap) const 
+	{
+		if (windowWidth <= windowsOverlap) 
+		{
+			throw std::runtime_error("The window width must be larger than the overlap width");
+		}
+		if ((to - from + 1) <= windowsOverlap)
+		{
+			throw std::runtime_error("The IndexRange width must be larger than the overlap width");
+		}
+		
+		// size_t numberOfWindows = ceil(double(to - from - windowsOverlap + 1) / (windowWidth - windowsOverlap));
+		size_t x = to - from - windowsOverlap + 1;
+		size_t y = windowWidth - windowsOverlap;
 
+		if (((std::numeric_limits<size_t>::max)() - x) < y)
+		{
+			throw std::runtime_error("An overflow occured when calculating the number of windows");
+		}
+
+		size_t numberOfWindows = (x + y - 1) / y;
+		std::vector<IndexRange> windows = std::vector<IndexRange>(numberOfWindows);
+
+		int i = -1;
+		size_t currentIndex = from;
+		while (currentIndex + windowsOverlap - 1 < to)
+		{
+			i++;
+			windows[i] = IndexRange(currentIndex, currentIndex + windowWidth - 1);
+			currentIndex = windows[i].to - windowsOverlap + 1;
+		}
+
+		if (windows[i].to > to)
+		{
+			windows[i].to = to;
+		}
+
+		return windows;
+	}
+	
+	/**
+	 * Calculates all combinations of two windows from two different ranges
+	 * @param query the first range, usually representing the query sequence
+	 * @param target the second range, usually representing the target sequence
+	 * @param windowWidth the width of a window (default 20)
+	 * @param windowsOverlap the amount of overlap between two windows (default 10)
+	 * @return a vector of pairs of two IndexRanges respecitvely windows
+	 */
+	static
+	std::vector<std::pair<IndexRange, IndexRange>> getRangePairs(const IndexRange& query, const IndexRange& target, const size_t& windowWidth = 20, const size_t& windowsOverlap = 10)
+	{
+		std::vector<IndexRange> queryWindows = query.overlappingWindows(windowWidth, windowsOverlap);
+		std::vector<IndexRange> targetWindows = target.overlappingWindows(windowWidth, windowsOverlap);
+		std::vector<std::pair<IndexRange, IndexRange>> pairs = std::vector<std::pair<IndexRange, IndexRange>>(queryWindows.size() * targetWindows.size());
+
+		int i = 0;
+
+		BOOST_FOREACH(IndexRange q, queryWindows)
+		{
+			BOOST_FOREACH(IndexRange t, targetWindows)
+			{
+				pairs[i] = std::pair<IndexRange, IndexRange>(q, t);
+				i++;
+			}
+		}
+
+		return pairs;
+	}
+	
 };
 
 } // namespace

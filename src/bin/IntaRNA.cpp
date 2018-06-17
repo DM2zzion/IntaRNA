@@ -222,33 +222,42 @@ int main(int argc, char **argv){
 										(parameters.reportBestPerRegion() ? std::numeric_limits<size_t>::max() : 1 )
 											* parameters.getOutputConstraint().reportMax );
 
-								// get interaction prediction handler
-								Predictor * predictor = parameters.getPredictor( *energy, bestInteractions );
-								INTARNA_CHECK_NOT_NULL(predictor,"predictor initialization failed");
-
+								Predictor * predictor;
+											
 								// run prediction for all range combinations
 								// NOTE: RANGE COMBINATIONS CAN NOT BE PARALLELIZED UNLESS
 								// (a) predictor.predict() is threadsafe (currently not, eg. due to offset setup)
 								// (b) or for each range pair a separate predictor is created (overhead to be checked)
+								
+								// boost foreach can't handle the expression std::pair<IndexRange, IndexRange> - it's counted as two arguments
+								typedef std::pair<IndexRange, IndexRange> IndexRangePair;
+								
 								BOOST_FOREACH(const IndexRange & tRange, parameters.getTargetRanges(*energy, targetNumber)) {
 								BOOST_FOREACH(const IndexRange & qRange, parameters.getQueryRanges(*energy, queryNumber)) {
+								BOOST_FOREACH(const IndexRangePair & windowCombination, IndexRange::getRangePairs(qRange, tRange, 66, 22)) {
 
 #if INTARNA_MULITHREADING
 									#pragma omp critical(intarna_omp_logOutput)
 #endif
+
+									// get interaction prediction handler
+									predictor = parameters.getPredictor( *energy, bestInteractions );
+									INTARNA_CHECK_NOT_NULL(predictor,"predictor initialization failed");
+
 									{ VLOG(1) <<"predicting interactions for"
 											<<" target "<<targetAcc->getSequence().getId()
-											<<" (range " <<(tRange+1)<<")"
+											<<" (range " <<(windowCombination.second+1)<<")"
 											<<" and"
 											<<" query "<<queryAcc.at(queryNumber)->getSequence().getId()
-											<<" (range " <<(qRange+1)<<")"
+											<<" (range " <<(windowCombination.first+1)<<")"
 											<<"..."; }
 
-									predictor->predict(	  tRange
-														, queryAcc.at(queryNumber)->getReversedIndexRange(qRange)
+									predictor->predict(	  windowCombination.second
+														, queryAcc.at(queryNumber)->getReversedIndexRange(windowCombination.first)
 														, parameters.getOutputConstraint()
 														);
 
+								} // window combinations
 								} // target ranges
 								} // query ranges
 

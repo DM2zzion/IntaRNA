@@ -225,39 +225,41 @@ int main(int argc, char **argv){
 								Predictor * predictor;
 											
 								// run prediction for all range combinations
-								// NOTE: RANGE COMBINATIONS CAN NOT BE PARALLELIZED UNLESS
-								// (a) predictor.predict() is threadsafe (currently not, eg. due to offset setup)
-								// (b) or for each range pair a separate predictor is created (overhead to be checked)
-								
-								// boost foreach can't handle the expression std::pair<IndexRange, IndexRange> - it's counted as two arguments
-								typedef std::pair<IndexRange, IndexRange> IndexRangePair;
-								
 								BOOST_FOREACH(const IndexRange & tRange, parameters.getTargetRanges(*energy, targetNumber)) {
 								BOOST_FOREACH(const IndexRange & qRange, parameters.getQueryRanges(*energy, queryNumber)) {
-								BOOST_FOREACH(const IndexRangePair & windowCombination, IndexRange::getRangePairs(qRange, tRange, 66, 22)) {
+
+									// get windows for both ranges
+									std::vector<IndexRange> queryWindows = qRange.overlappingWindows(parameters.getWindowWidth(), parameters.getWindowOverlap());
+									std::vector<IndexRange> targetWindows = tRange.overlappingWindows(parameters.getWindowWidth(), parameters.getWindowOverlap());
+
+									// iterate over all window combinations
+									BOOST_FOREACH(IndexRange qWindow, queryWindows) {
+									BOOST_FOREACH(IndexRange tWindow, targetWindows) {
 
 #if INTARNA_MULITHREADING
-									#pragma omp critical(intarna_omp_logOutput)
+										#pragma omp critical(intarna_omp_logOutput)
 #endif
+										{ VLOG(1) <<"predicting interactions for"
+												<<" target "<<targetAcc->getSequence().getId()
+												<<" (range " <<(tWindow+1)<<")"
+												<<" and"
+												<<" query "<<queryAcc.at(queryNumber)->getSequence().getId()
+												<<" (range " <<(qWindow+1)<<")"
+												<<"..."; }
 
-									// get interaction prediction handler
-									predictor = parameters.getPredictor( *energy, bestInteractions );
-									INTARNA_CHECK_NOT_NULL(predictor,"predictor initialization failed");
+										// get interaction prediction handler
+										predictor = parameters.getPredictor( *energy, bestInteractions );
+										INTARNA_CHECK_NOT_NULL(predictor,"predictor initialization failed");
 
-									{ VLOG(1) <<"predicting interactions for"
-											<<" target "<<targetAcc->getSequence().getId()
-											<<" (range " <<(windowCombination.second+1)<<")"
-											<<" and"
-											<<" query "<<queryAcc.at(queryNumber)->getSequence().getId()
-											<<" (range " <<(windowCombination.first+1)<<")"
-											<<"..."; }
+										// run prediction for this window combination
+										predictor->predict(	  tWindow
+															, queryAcc.at(queryNumber)->getReversedIndexRange(qWindow)
+															, parameters.getOutputConstraint()
+															);
+										// garbage collection
+										INTARNA_CLEANUP(predictor);
 
-									predictor->predict(	  windowCombination.second
-														, queryAcc.at(queryNumber)->getReversedIndexRange(windowCombination.first)
-														, parameters.getOutputConstraint()
-														);
-
-								} // window combinations
+									}} // window combinations
 								} // target ranges
 								} // query ranges
 
@@ -273,7 +275,6 @@ int main(int argc, char **argv){
 								reportedInteractions += output->reported();
 
 								// garbage collection
-								 INTARNA_CLEANUP(predictor);
 								 INTARNA_CLEANUP(output);
 								 INTARNA_CLEANUP(energy);
 

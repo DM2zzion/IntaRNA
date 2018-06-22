@@ -843,7 +843,7 @@ parse(int argc, char** argv)
 			parseRegion( "tRegion", tRegionString, target, tRegion );
 
 
-			//////////////// WINDOW CONSTRAINTS ///////////////////
+			//////////////// WINDOW-BASED COMPUTATION ///////////////////
 
 			// check if window-based computation enabled
 			if (windowWidth.val > 0) {
@@ -1233,7 +1233,7 @@ CommandLineParsing::
 getWindowWidth() const
 {
 	// check if disabled (== 0)
-	return windowWidth.val == 0 ? std::numeric_limits<size_t>::max() / 2 : windowWidth.val;
+	return windowWidth.val == 0 ? std::numeric_limits<size_t>::max() : windowWidth.val;
 }
 
 ////////////////////////////////////////////////////////////////////////////

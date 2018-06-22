@@ -116,10 +116,27 @@ public:
 	 * according sequence number.
 	 * @param energy the energy handler later used for prediction (needed for region postprocessing)
 	 * @param sequenceNumber the number of the sequence within the vector
-	 *         returned by getTargetSequences()
+	 *        returned by getTargetSequences()
 	 * @return the range list for the according sequence.
 	 */
 	const IndexRangeList& getTargetRanges( const InteractionEnergy & energy, const size_t sequenceNumber ) const;
+
+	/**
+	 * Access to the maximal window width of a query/target sequence range to
+	 * be used for prediction using overlapping windows to save memory.
+	 *
+	 * @return the maximal window width to be used for windows-based
+	 *         computations
+	 */
+	const size_t getWindowWidth() const;
+
+	/**
+	 * Access to the window overlap of a query/target sequence range to
+	 * be used for prediction using overlapping windows to save memory.
+	 *
+	 * @return the window overlap to be used for window-based computations
+	 */
+	const size_t getWindowOverlap() const;
 
 	/**
 	 * Returns a newly allocated Energy object according to the user defined
@@ -1034,6 +1051,7 @@ protected:
 	getFullFilename( const std::string & fileName
 					, const RnaSequence * target
 					, const RnaSequence * query ) const;
+
 
 };
 

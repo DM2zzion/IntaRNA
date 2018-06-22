@@ -1185,6 +1185,24 @@ getTargetSequences() const
 
 ////////////////////////////////////////////////////////////////////////////
 
+const size_t
+CommandLineParsing::
+getWindowWidth() const
+{
+	return 1000; // TODO replace with parameter value
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+const size_t
+CommandLineParsing::
+getWindowOverlap() const
+{
+	return 100; // TODO replace with parameter value
+}
+
+////////////////////////////////////////////////////////////////////////////
+
 Accessibility*
 CommandLineParsing::
 getQueryAccessibility( const size_t sequenceNumber ) const

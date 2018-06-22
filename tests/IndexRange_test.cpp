@@ -101,33 +101,6 @@ TEST_CASE( "IndexRange", "[IndexRange]" ) {
 		REQUIRE ( windows[0] == r5 );
 	}
 	
-	SECTION("check getRangePairs") {
-		
-		size_t windowWidth = 17;
-		size_t windowsOverlap = 5;
-		IndexRange r6 = IndexRange(24, 48);
-		IndexRange rw8 = IndexRange(24, 40);
-		IndexRange rw9 = IndexRange(36, 48);
-		IndexRange r7 = IndexRange(167, 200);
-		IndexRange rw10 = IndexRange(167, 183);
-		IndexRange rw11 = IndexRange(179, 195);
-		IndexRange rw12 = IndexRange(191, 200);
-		std::pair<IndexRange, IndexRange> p1 = std::pair<IndexRange, IndexRange>(rw8, rw10);
-		std::pair<IndexRange, IndexRange> p2 = std::pair<IndexRange, IndexRange>(rw8, rw11);
-		std::pair<IndexRange, IndexRange> p3 = std::pair<IndexRange, IndexRange>(rw8, rw12);
-		std::pair<IndexRange, IndexRange> p4 = std::pair<IndexRange, IndexRange>(rw9, rw10);
-		std::pair<IndexRange, IndexRange> p5 = std::pair<IndexRange, IndexRange>(rw9, rw11);
-		std::pair<IndexRange, IndexRange> p6 = std::pair<IndexRange, IndexRange>(rw9, rw12);
-		std::vector<std::pair<IndexRange, IndexRange>> pairs = IndexRange::getRangePairs(r6, r7, windowWidth, windowsOverlap);
-		
-		REQUIRE ( pairs.size() == 6 );
-		REQUIRE ( pairs[0] == p1 );
-		REQUIRE ( pairs[1] == p2 );
-		REQUIRE ( pairs[2] == p3 );
-		REQUIRE ( pairs[3] == p4 );
-		REQUIRE ( pairs[4] == p5 );
-		REQUIRE ( pairs[5] == p6 );
-	}
 	
 }
 

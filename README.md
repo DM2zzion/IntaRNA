@@ -1,5 +1,5 @@
 
-# IntaRNA [![GitHub](https://img.shields.io/github/tag/BackofenLab/IntaRNA.svg)](https://github.com/BackofenLab/IntaRNA/releases)  [![Bioconda](https://anaconda.org/bioconda/intarna/badges/version.svg)](https://anaconda.org/bioconda/intarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/intarna/status "Docker Repository on Quay")](https://quay.io/repository/biocontainers/intarna) [![Build Status](https://travis-ci.org/BackofenLab/IntaRNA.svg?branch=master)](https://travis-ci.org/BackofenLab/IntaRNA)
+# IntaRNA [![releases](https://img.shields.io/github/tag/BackofenLab/IntaRNA.svg)](https://github.com/BackofenLab/IntaRNA/releases)  [![Bioconda](https://anaconda.org/bioconda/intarna/badges/version.svg)](https://anaconda.org/bioconda/intarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/intarna/status "Docker Repository on Quay")](https://quay.io/repository/biocontainers/intarna) [![Build Status](https://travis-ci.org/BackofenLab/IntaRNA.svg?branch=master)](https://travis-ci.org/BackofenLab/IntaRNA)
 
 **Efficient RNA-RNA interaction prediction incorporating accessibility and 
 seeding of interaction sites**
@@ -79,6 +79,7 @@ The following topics are covered by this documentation:
   - [Energy parameters and temperature](#energy)
   - [Additional output files](#outFiles)
     - [Minimal energy profiles](#profileMinE)
+    - [Spot probability profiles](#profileSpotProb) using partition functions
     - [Minimal energy for all intermolecular index pairs](#pairMinE)
     - [Interaction probabilities for interaction spots of interest](#spotProb)
     - [Accessibility and unpaired probabilities](#accessibility)
@@ -138,7 +139,7 @@ dependencies:
     - libboost_program_options
     - libboost_filesystem
     - libboost_system
-- [Vienna RNA package](http://www.tbi.univie.ac.at/RNA/) version >= 2.4.4
+- [Vienna RNA package](http://www.tbi.univie.ac.at/RNA/) version >= 2.4.8
 - if [cloning from github](#instgithub): GNU autotools (automake, autoconf, ..)
 
 Also used by IntaRNA, but already part of the source code distribution (and thus
@@ -934,6 +935,24 @@ abline(h=0, col="red", lty=2, lwd=2)
 
 This plot reveals two less but still stable (*E* below 0) interaction sites beside the
 mfe interaction close to the 5'-end of the molecule.
+
+
+
+<br />
+<a name="profileSpotProb" />
+
+### Spot probability profiles
+
+Similarly to (minimal energy profiles)[#profileMinE], it is also possible to
+compute position-wise probabilities how likely a position is covered by an
+interaction, i.e. its *spot probability*. To the end, we compute for each
+position $i$ the partition function $Zi$ of all interactions covering $i$.
+Given the overall partition function *Z* including all possible interactions, 
+the position-speficit spot probability for *i* is given by *Zi/Z*.
+
+Such profiles can be generated using `--out=qSpotProb:MYPROFILEFILE.csv` or 
+`--out=tSpotProb:...` for the query/target sequence respectively and independently.
+
 
 
 <br />

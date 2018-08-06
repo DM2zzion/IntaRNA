@@ -51,17 +51,39 @@ add( const Interaction & interaction )
 		// count interaction
 		reportedInteractions++;
 		if (storage.size() < maxToStore || lessThan_StorageContainer( &interaction, *(storage.rbegin()) )) {
-			// remove last element if needed
-			if (storage.size() >= maxToStore) {
-				// delete object
-				delete (*(storage.rbegin()));
-				// remove pointer
-				storage.resize(storage.size()-1);
-			}
+
 			// find where to insert this interaction
 			StorageContainer::iterator insertPos = std::lower_bound( storage.begin(), storage.end(), &interaction, lessThan_StorageContainer );
-			// insert current interaction
-			storage.insert( insertPos, new Interaction(interaction) );
+
+			// check for duplicates
+			// lessThan_StorageContainer(*insertPos, &interaction) obsolete because of lower_bound
+			if (storage.size() == 0 || lessThan_StorageContainer(&interaction, *insertPos)) {				
+				
+				bool isLastElement = false;
+				
+				// remove last element if needed
+				if (storage.size() >= maxToStore) {
+					
+					// check if insertPos points to the last element in the list which is about to get deleted -
+					// if this is the case, move the iterator one element backwards
+					if (insertPos == std::prev(storage.end())){
+						insertPos = std::prev(insertPos);
+						isLastElement = true;
+					}
+					
+					// delete object
+					delete (*(storage.rbegin()));
+					// remove pointer
+					storage.resize(storage.size()-1);
+				}
+				
+				// if insertPos was moved backwards, move it back to it's former position (== storage.end())
+				if (isLastElement){
+					insertPos = std::next(insertPos);
+				}
+				
+				storage.insert( insertPos, new Interaction(interaction) );
+			}
 		}
 	}
 }

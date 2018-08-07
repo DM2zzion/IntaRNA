@@ -223,8 +223,6 @@ int main(int argc, char **argv){
 										(parameters.reportBestPerRegion() ? std::numeric_limits<size_t>::max() : 1 )
 											* parameters.getOutputConstraint().reportMax );
 
-								Predictor * predictor;
-											
 								// run prediction for all range combinations
 								BOOST_FOREACH(const IndexRange & tRange, parameters.getTargetRanges(*energy, targetNumber)) {
 								BOOST_FOREACH(const IndexRange & qRange, parameters.getQueryRanges(*energy, queryNumber)) {
@@ -267,7 +265,7 @@ int main(int argc, char **argv){
 														<<" ..."; }
 		
 												// get interaction prediction handler
-												predictor = parameters.getPredictor( *energy, bestInteractions );
+												Predictor * predictor = parameters.getPredictor( *energy, bestInteractions );
 												INTARNA_CHECK_NOT_NULL(predictor,"predictor initialization failed");
 		
 												// run prediction for this window combination
@@ -312,7 +310,7 @@ int main(int argc, char **argv){
 								} // target ranges
 								} // query ranges
 #if INTARNA_MULITHREADING
-								#pragma omp critical(intarna_omp_logOutput)
+								#pragma omp critical(intarna_omp_outputHandlerUpdate)
 #endif
 								{// update final output handler
 								BOOST_FOREACH( const Interaction * inter, bestInteractions) {

@@ -856,15 +856,31 @@ parse(int argc, char** argv)
 				}
 				// ensure interaction length is restricted
 				size_t maxIntLength = 0;
-				if (qIntLenMax.val == 0 && qAccW.val == 0) {
-					throw error("window-based computation: maximal query interaction length has to be restricted either via --qAccW or --qIntLenMax");
-				} else { // update maximum
-					maxIntLength = std::max(qIntLenMax.val, qAccW.val);
+				if (qAcc.val != 'N') { // check if accessibility computation enabled
+					if (qIntLenMax.val == 0 && qAccW.val == 0) {
+						throw error("window-based computation: maximal query interaction length has to be restricted either via --qAccW or --qIntLenMax");
+					} else { // update maximum
+						maxIntLength = std::max(qIntLenMax.val, qAccW.val);
+					}
+				} else { // max interaction length of query
+					if (qIntLenMax.val == 0) {
+						throw error("window-based computation: maximal query interaction length has to be restricted via --qIntLenMax");
+					} else {
+						maxIntLength = qIntLenMax.val;
+					}
 				}
-				if (tIntLenMax.val == 0 && tAccW.val == 0) {
-					throw error("window-based computation: maximal target interaction length has to be restricted either via --tAccW or --tIntLenMax");
-				} else { // update maximum
-					maxIntLength = maxIntLength < std::max(tAccW.val,tIntLenMax.val) ? std::max(tAccW.val,tIntLenMax.val) : maxIntLength;
+				if (tAcc.val != 'N') {
+					if (tIntLenMax.val == 0 && tAccW.val == 0) {
+						throw error("window-based computation: maximal target interaction length has to be restricted either via --tAccW or --tIntLenMax");
+					} else { // update maximum
+						maxIntLength = maxIntLength < std::max(tAccW.val,tIntLenMax.val) ? std::max(tAccW.val,tIntLenMax.val) : maxIntLength;
+					}
+				} else {
+					if (tIntLenMax.val == 0) {
+						throw error("window-based computation: maximal target interaction length has to be restricted via --tIntLenMax");
+					} else { // update maximum
+						maxIntLength = maxIntLength < tIntLenMax.val ? tIntLenMax.val : maxIntLength;
+					}
 				}
 				if (windowOverlap.val < maxIntLength) {
 					throw error("window-based computation: --windowOverlap ("+toString(windowOverlap.val)+") has to be at least as large as the maximum of --q|tAccW or --q|tIntLenMax ("+toString(maxIntLength)+")");

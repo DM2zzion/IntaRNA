@@ -236,7 +236,7 @@ int main(int argc, char **argv){
 									// iterate over all window combinations
 #if INTARNA_MULITHREADING
 									// this parallelization should only be enabled if neither the outer target-loop nor the inner query-loop are parallelized
-									# pragma omp parallel for schedule(dynamic) collapse(2) num_threads( parameters.getThreads() ) shared(queryAcc,reportedInteractions,exceptionPtrDuringOmp,exceptionInfoDuringOmp,targetAcc,targetNumber,queryNumber,queryWindows,targetWindows) if(parallelizeWindowsLoop)
+									# pragma omp parallel for schedule(dynamic) collapse(2) num_threads( parameters.getThreads() ) shared(queryAcc,reportedInteractions,exceptionPtrDuringOmp,exceptionInfoDuringOmp,targetAcc,targetNumber,queryNumber,queryWindows,targetWindows, bestInteractions) if(parallelizeWindowsLoop)
 #endif									
 									for (int qNumWindow = 0; qNumWindow < queryWindows.size(); ++qNumWindow) {
 									for (int tNumWindow = 0; tNumWindow < targetWindows.size(); ++tNumWindow) {									
@@ -247,9 +247,8 @@ int main(int argc, char **argv){
 											try {
 #endif										
 										
-												IndexRange qWindow = queryWindows[qNumWindow];
-												IndexRange tWindow = targetWindows[tNumWindow];
-		
+												IndexRange qWindow = queryWindows.at(qNumWindow);
+												IndexRange tWindow = targetWindows.at(tNumWindow);
 #if INTARNA_MULITHREADING
 												#pragma omp critical(intarna_omp_logOutput)
 #endif
@@ -259,7 +258,13 @@ int main(int argc, char **argv){
 														<<" and"
 														<<" query "<<queryAcc.at(queryNumber)->getSequence().getId()
 														<<" (range " <<(qWindow+1)<<")"
-														<<"..."; }
+#if INTARNA_MULITHREADING
+#if INTARNA_IN_DEBUG_MODE
+
+														<<" #thread "<<omp_get_thread_num()
+#endif
+#endif
+														<<" ..."; }
 		
 												// get interaction prediction handler
 												predictor = parameters.getPredictor( *energy, bestInteractions );

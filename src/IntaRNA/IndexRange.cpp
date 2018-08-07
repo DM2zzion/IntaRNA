@@ -26,12 +26,12 @@ overlappingWindows(const size_t windowWidth, const size_t windowOverlap) const
 #if INTARNA_IN_DEBUG_MODE
 	// minimal width check
 	if (windowWidth <= 2) {
-		throw std::runtime_error("IndexRange::overlappingWindows("+toString(windowWidth)+","+windowOverlap+") : "
+		throw std::runtime_error("IndexRange::overlappingWindows("+toString(windowWidth)+","+toString(windowOverlap)+") : "
 				+"window width must be at least 2");
 	}
 	// ensure width exceeds overlap
 	if (windowWidth <= windowOverlap) {
-		throw std::runtime_error("IndexRange::overlappingWindows("+toString(windowWidth)+","+windowOverlap+") : "
+		throw std::runtime_error("IndexRange::overlappingWindows("+toString(windowWidth)+","+toString(windowOverlap)+") : "
 				+"window width must be larger than the overlap");
 	}
 	// ensure ascending range
@@ -56,7 +56,7 @@ overlappingWindows(const size_t windowWidth, const size_t windowOverlap) const
 	// avoid overflows
 	if (((std::numeric_limits<size_t>::max)() - x) < y)
 	{
-		throw std::runtime_error("IndexRange::overlappingWindows("+toString(windowWidth)+","+windowOverlap+") : "
+		throw std::runtime_error("IndexRange::overlappingWindows("+toString(windowWidth)+","+toString(windowOverlap)+") : "
 			+ "an overflow occurred when calculating the number of windows for range "+toString(*this));
 	}
 #endif

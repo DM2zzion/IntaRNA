@@ -57,7 +57,7 @@ add( const Interaction & interaction )
 
 			// check for duplicates
 			// lessThan_StorageContainer(*insertPos, &interaction) obsolete because of lower_bound
-			if (storage.size() == 0 || lessThan_StorageContainer(&interaction, *insertPos)) {				
+			if (insertPos == storage.end() || lessThan_StorageContainer(&interaction, *insertPos)) {				
 				
 				bool isLastElement = false;
 				
